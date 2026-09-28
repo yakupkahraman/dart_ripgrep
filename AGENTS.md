@@ -47,12 +47,16 @@ Build hooks can't ship an executable into a Flutter macOS app without
 patching Flutter, so on macOS the hook does nothing.
 
 On Linux and Windows, Flutter just copies code assets into the bundle, so the
-hook works there. Verified with `dart build cli --target-os=linux`: `rg` lands
-in `bundle/lib/` with its executable bit intact. Not yet verified: Flutter
-Linux and Windows builds (to be tested in CI). Flutter's Linux CMake template
-installs native assets with `install(DIRECTORY)`, which by CMake's documented
-defaults drops the executable bit. So at runtime `Ripgrep` runs a private
-executable copy from `$XDG_CACHE_HOME` when the bundled file isn't executable.
+hook works there. Verified in CI with Flutter release builds:
+
+- Windows: `rg.exe` lands next to the app's `.exe` and runs.
+- Linux: `rg` lands in `bundle/lib/`, but Flutter's CMake template installs it
+  with `install(DIRECTORY)`, which drops the executable bit (`-rw-r--r--`).
+  At runtime `Ripgrep` then runs a private executable copy from
+  `$XDG_CACHE_HOME/dart_ripgrep/<version>/`, which works.
+- `dart build cli --target-os=linux` puts `rg` in `bundle/lib/` with its
+  executable bit intact.
+
 Pure Dart CLIs on macOS get no `rg` for now.
 
 ### CocoaPods plugin: rejected

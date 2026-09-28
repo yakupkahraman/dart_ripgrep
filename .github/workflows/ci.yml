@@ -8,9 +8,10 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dart-lang/setup-dart@v1
-      - run: dart pub get
+      # example/ needs the Flutter SDK, which this job doesn't install.
+      - run: dart pub get --no-example
       - run: dart format --output=none --set-exit-if-changed lib bin hook
       - run: dart analyze lib bin hook
 
@@ -35,10 +36,16 @@ jobs:
         working-directory: example
         shell: bash
     steps:
-      - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: actions/checkout@v5
+      # Flutter publishes no prebuilt SDK for Linux arm64, so clone it there.
+      - if: matrix.os != 'ubuntu-24.04-arm'
+        uses: subosito/flutter-action@v2
         with:
           channel: stable
+      - if: matrix.os == 'ubuntu-24.04-arm'
+        run: |
+          git clone --depth 1 -b stable https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
+          echo "$RUNNER_TEMP/flutter/bin" >> "$GITHUB_PATH"
       - if: runner.os == 'Linux'
         run: |
           sudo apt-get update
