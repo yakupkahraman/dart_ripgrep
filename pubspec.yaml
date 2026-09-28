@@ -4,6 +4,11 @@ version: 0.1.0
 repository: https://github.com/yakupkahraman/dart_ripgrep
 topics: [search, ripgrep, grep, desktop, files]
 
+platforms:
+  linux:
+  macos:
+  windows:
+
 environment:
   sdk: ^3.13.1
 
