@@ -157,8 +157,8 @@ void main() {
   }, testOn: '!windows');
 
   test('cancelling the subscription kills ripgrep', () async {
-    // Enough output to fill the pipe, so ripgrep is still running (blocked on
-    // write) when the subscription is cancelled.
+    // Pausing after the first result stops reading stdout, so once the pipe
+    // fills ripgrep blocks on write and is still alive at cancel time.
     final big = List.filled(2000, 'cancelme ${'x' * 100}').join('\n');
     for (var i = 0; i < 200; i++) {
       File(p('big/$i.txt'))
@@ -167,8 +167,11 @@ void main() {
     }
     const pattern = 'cancelme_unique_4f2a|cancelme';
     final first = Completer<void>();
-    final sub = rg.search(pattern, root.path).listen((_) {
-      if (!first.isCompleted) first.complete();
+    late final StreamSubscription<RgLine> sub;
+    sub = rg.search(pattern, root.path).listen((_) {
+      if (first.isCompleted) return;
+      sub.pause();
+      first.complete();
     });
     await first.future;
     expect(await _isRunning(pattern), isTrue);

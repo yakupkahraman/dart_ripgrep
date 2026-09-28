@@ -13,7 +13,7 @@ jobs:
       # example/ needs the Flutter SDK, which this job doesn't install.
       - run: dart pub get --no-example
       - run: dart format --output=none --set-exit-if-changed lib bin hook test
-      - run: dart analyze
+      - run: dart analyze lib bin hook test
 
   test:
     strategy:
