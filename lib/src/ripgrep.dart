@@ -12,6 +12,10 @@ class Ripgrep {
   /// Path of the bundled binary. Never falls back to an `rg` on PATH.
   final String executable;
 
+  /// Locates the ripgrep bundled with the app.
+  ///
+  /// Throws a [StateError] if it isn't there, for example when the macOS
+  /// setup step (`dart run dart_ripgrep:setup`) hasn't been run.
   Ripgrep() : executable = _locate();
 
   /// Runs the ripgrep at [executable] instead of the bundled one.

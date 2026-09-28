@@ -1,7 +1,8 @@
 name: dart_ripgrep
 description: Fast file listing and search for Flutter/Dart desktop apps, powered by a bundled ripgrep.
 version: 0.1.0
-# repository: https://github.com/my_org/my_repo
+repository: https://github.com/yakupkahraman/dart_ripgrep
+topics: [search, ripgrep, grep, desktop, files]
 
 environment:
   sdk: ^3.13.1
