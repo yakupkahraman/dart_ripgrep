@@ -17,17 +17,24 @@ Future<void> main() async {
   runApp(const MaterialApp(home: Spike()));
 }
 
-/// Runs the bundled rg on a temp dir the app itself can read, even sandboxed.
+/// Uses the bundled rg on a temp dir the app itself can read, even sandboxed.
 Future<(bool, String)> _check() async {
   try {
     final rg = Ripgrep();
     final dir = Directory.systemTemp.createTempSync('dart_ripgrep');
-    File('${dir.path}/a.txt').writeAsStringSync('one\nhello ripgrep\n');
-    final version = await Process.run(rg.executable, ['--version']);
-    final search = await Process.run(rg.executable, ['-n', 'hello', dir.path]);
+    File('${dir.path}/a.txt').writeAsStringSync('one\nçay hello\n');
+    final files = await rg.files(dir.path).toList();
+    final match = await rg.search('hello', dir.path).first as RgMatch;
     dir.deleteSync(recursive: true);
-    final ok = search.exitCode == 0 && '${search.stdout}'.contains('2:hello');
-    return (ok, '${rg.executable}\n${version.stdout}\n${search.stdout}${search.stderr}');
+    final hit = match.submatches.single;
+    final ok =
+        files.length == 1 &&
+        match.lineNumber == 2 &&
+        match.text.substring(hit.start, hit.end) == 'hello';
+    return (
+      ok,
+      '${rg.executable}\n$files\n${match.path}:${match.lineNumber}: ${match.text}',
+    );
   } catch (e) {
     return (false, 'ERROR: $e');
   }

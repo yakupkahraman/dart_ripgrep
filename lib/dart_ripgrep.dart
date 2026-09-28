@@ -2,3 +2,4 @@
 library;
 
 export 'src/ripgrep.dart';
+export 'src/types.dart';

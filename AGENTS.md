@@ -16,6 +16,20 @@ apps and exposes file listing and content search as typed Dart streams.
 - Use conventional commits. Don't commit or push; the maintainer does.
 - Out of scope: search-and-replace, indexing or caching, file watching, UI.
 
+## API notes
+
+- There is no `maxResults` option: ripgrep's `--max-count` is per file, and
+  `.take(n)` on the stream gives a global limit while also killing the process.
+- Context lines need their own type, so `search` returns `Stream<RgLine>`:
+  a sealed class that is either `RgMatch` or `RgContext`.
+- ripgrep reports UTF-8 byte offsets. `json.dart` converts them to UTF-16
+  indices so ranges work directly on Dart strings.
+- `files()` uses `--null`, because paths can contain newlines.
+- Every run passes `--no-config`, so a user's `RIPGREP_CONFIG_PATH` can't
+  change results.
+- Tests run against the pinned release, fetched with the same SHA-256 check
+  (`Ripgrep.at`, which is `@visibleForTesting`).
+
 ## Architecture
 
 How the ripgrep binary gets into the app, and why.

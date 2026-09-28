@@ -9,8 +9,6 @@ bundled [ripgrep](https://github.com/BurntSushi/ripgrep).
   build time.
 - **Lean:** only the binary for the target platform goes into your build.
 
-> **Work in progress:** the search API isn't implemented yet.
-
 ## Platforms
 
 | | x64 | arm64 |
@@ -42,8 +40,32 @@ ripgrep with your app.
 import 'package:dart_ripgrep/dart_ripgrep.dart';
 
 final rg = Ripgrep();
-print(rg.executable); // path to the bundled binary
+
+// List files, respecting .gitignore.
+await for (final path in rg.files('/path/to/project')) {
+  print(path);
+}
+
+// Search.
+final results = rg.search(
+  'TODO',
+  '/path/to/project',
+  options: const RgOptions(caseMode: RgCase.smart, include: ['*.dart']),
+);
+await for (final match in results.whereType<RgMatch>().take(100)) {
+  for (final r in match.submatches) {
+    print('${match.path}:${match.lineNumber} '
+        '${match.text.substring(r.start, r.end)}');
+  }
+}
 ```
+
+- `submatches` are indices into `text`, safe for highlighting non-ASCII lines.
+- Cancelling a subscription (including via `.take(n)`) kills the ripgrep
+  process, so a new query can simply replace the old one.
+- With `RgOptions(context: n)`, `search` also emits `RgContext` lines.
+- If ripgrep hits an error (such as an unreadable file), the results found so
+  far are still delivered and the stream then ends with an `RgException`.
 
 ## License
 

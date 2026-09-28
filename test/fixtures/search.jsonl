@@ -1,0 +1,15 @@
+{"type":"begin","data":{"path":{"text":"src/bin.txt"}}}
+{"type":"context","data":{"path":{"text":"src/bin.txt"},"lines":{"text":"a\n"},"line_number":1,"absolute_offset":0,"submatches":[]}}
+{"type":"match","data":{"path":{"text":"src/bin.txt"},"lines":{"bytes":"//4gaGVsbG8gYnl0ZXMK"},"line_number":2,"absolute_offset":2,"submatches":[{"match":{"text":"hello"},"start":3,"end":8}]}}
+{"type":"end","data":{"path":{"text":"src/bin.txt"},"binary_offset":null,"stats":{"elapsed":{"secs":0,"nanos":41791,"human":"0.000042s"},"searches":1,"searches_with_match":1,"bytes_searched":17,"bytes_printed":382,"matched_lines":1,"matches":1}}}
+{"type":"begin","data":{"path":{"text":"src/emoji.txt"}}}
+{"type":"context","data":{"path":{"text":"src/emoji.txt"},"lines":{"text":"one\n"},"line_number":1,"absolute_offset":0,"submatches":[]}}
+{"type":"match","data":{"path":{"text":"src/emoji.txt"},"lines":{"text":"😀 hello\n"},"line_number":2,"absolute_offset":4,"submatches":[{"match":{"text":"hello"},"start":5,"end":10}]}}
+{"type":"end","data":{"path":{"text":"src/emoji.txt"},"binary_offset":null,"stats":{"elapsed":{"secs":0,"nanos":8208,"human":"0.000008s"},"searches":1,"searches_with_match":1,"bytes_searched":15,"bytes_printed":382,"matched_lines":1,"matches":1}}}
+{"type":"begin","data":{"path":{"text":"src/tr.txt"}}}
+{"type":"context","data":{"path":{"text":"src/tr.txt"},"lines":{"text":"alpha\n"},"line_number":1,"absolute_offset":0,"submatches":[]}}
+{"type":"match","data":{"path":{"text":"src/tr.txt"},"lines":{"text":"çay hello dünya hello\n"},"line_number":2,"absolute_offset":6,"submatches":[{"match":{"text":"hello"},"start":5,"end":10},{"match":{"text":"hello"},"start":18,"end":23}]}}
+{"type":"context","data":{"path":{"text":"src/tr.txt"},"lines":{"text":"omega\n"},"line_number":3,"absolute_offset":30,"submatches":[]}}
+{"type":"end","data":{"path":{"text":"src/tr.txt"},"binary_offset":null,"stats":{"elapsed":{"secs":0,"nanos":7833,"human":"0.000008s"},"searches":1,"searches_with_match":1,"bytes_searched":36,"bytes_printed":572,"matched_lines":1,"matches":2}}}
+{"data":{"elapsed_total":{"human":"0.001120s","nanos":1120417,"secs":0},"stats":{"bytes_printed":1336,"bytes_searched":68,"elapsed":{"human":"0.000058s","nanos":57832,"secs":0},"matched_lines":3,"matches":4,"searches":3,"searches_with_match":3}},"type":"summary"}
+{"type":"match","data":{"path":{"bytes":"c3JjL2NhZukudHh0"},"lines":{"text":"hello\n"},"line_number":1,"absolute_offset":0,"submatches":[{"match":{"text":"hello"},"start":0,"end":5}]}}
