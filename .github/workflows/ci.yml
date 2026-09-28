@@ -1,0 +1,60 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get
+      - run: dart format --output=none --set-exit-if-changed lib bin hook
+      - run: dart analyze lib bin hook
+
+  # Builds the example app in release mode, which is what ships, and checks
+  # that it finds and runs the bundled rg.
+  example:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            app: build/macos/Build/Products/Release/example.app/Contents/MacOS/example
+          - os: ubuntu-latest
+            app: build/linux/x64/release/bundle/example
+          - os: ubuntu-24.04-arm
+            app: build/linux/arm64/release/bundle/example
+          - os: windows-latest
+            app: build/windows/x64/runner/Release/example.exe
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: example
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev xvfb
+      - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Linux' && 'linux' || 'windows' }} --release
+      - name: Show where rg landed
+        run: find build -name 'rg' -o -name 'rg.exe' | xargs ls -l
+      - name: Run the app
+        env:
+          DART_RIPGREP_RESULT: result.txt
+        run: |
+          status=0
+          if [ "$RUNNER_OS" = Linux ]; then
+            xvfb-run -a "${{ matrix.app }}" || status=$?
+          else
+            "${{ matrix.app }}" || status=$?
+          fi
+          cat "$DART_RIPGREP_RESULT" 2>/dev/null || true
+          exit $status
