@@ -174,27 +174,33 @@ void main() {
       first.complete();
     });
     await first.future;
-    expect(await _isRunning(pattern), isTrue);
+    final (before, listing) = await _rgProcesses();
+    expect(before, isTrue, reason: 'rg should still run; processes:\n$listing');
     await sub.cancel();
 
     final deadline = DateTime.now().add(const Duration(seconds: 5));
-    while (await _isRunning(pattern) && DateTime.now().isBefore(deadline)) {
+    var (after, afterListing) = await _rgProcesses();
+    while (after && DateTime.now().isBefore(deadline)) {
       await Future<void>.delayed(const Duration(milliseconds: 100));
+      (after, afterListing) = await _rgProcesses();
     }
-    expect(await _isRunning(pattern), isFalse);
+    expect(after, isFalse, reason: 'rg still running:\n$afterListing');
   });
 }
 
-Future<bool> _isRunning(String arg) async {
+// Returns whether an rg process is alive, plus the raw process listing so a
+// failure shows what was actually running.
+Future<(bool, String)> _rgProcesses() async {
   if (Platform.isWindows) {
-    final r = await Process.run('powershell', [
-      '-NoProfile',
-      '-Command',
-      "(Get-CimInstance Win32_Process -Filter \"Name='rg.exe'\" | "
-          "Where-Object { \$_.CommandLine -like '*cancelme_unique_4f2a*' }).Count",
+    final r = await Process.run('tasklist', [
+      '/FI',
+      'IMAGENAME eq rg.exe',
+      '/NH',
     ]);
-    return (int.tryParse('${r.stdout}'.trim()) ?? 0) > 0;
+    final out = '${r.stdout}';
+    return (out.contains('rg.exe'), out);
   }
-  final r = await Process.run('pgrep', ['-f', arg.split('|').first]);
-  return r.exitCode == 0;
+  // The pattern is unique to this test, so other rg processes don't count.
+  final r = await Process.run('pgrep', ['-fl', 'cancelme_unique_4f2a']);
+  return (r.exitCode == 0, '${r.stdout}');
 }
