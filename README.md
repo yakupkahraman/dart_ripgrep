@@ -19,6 +19,8 @@ bundled [ripgrep](https://github.com/BurntSushi/ripgrep).
 
 ## Getting started
 
+Requires Dart 3.10 or later (Flutter 3.38 or later).
+
 ```sh
 dart pub add dart_ripgrep
 ```

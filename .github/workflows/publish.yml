@@ -1,0 +1,20 @@
+name: Publish to pub.dev
+
+# Pushing a tag like v0.1.1 publishes that version. pub.dev checks that the
+# tag matches the version in pubspec.yaml and that it comes from this repo.
+on:
+  push:
+    tags:
+      - 'v[0-9]+.[0-9]+.[0-9]+'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write # lets pub.dev verify this run, no stored secret needed
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dart-lang/setup-dart@v1
+      # example/ needs the Flutter SDK, which this job doesn't install.
+      - run: dart pub get --no-example
+      - run: dart pub publish --force
