@@ -7,11 +7,9 @@ import 'package:test/test.dart';
 void main() {
   // Recorded with ripgrep 15.2.0: `rg --json -C1 --sort path hello src`,
   // plus a hand-written match whose path is not valid UTF-8.
-  final lines = File('test/fixtures/search.jsonl')
-      .readAsLinesSync()
-      .map(parseJsonLine)
-      .nonNulls
-      .toList();
+  final lines = File(
+    'test/fixtures/search.jsonl',
+  ).readAsLinesSync().map(parseJsonLine).nonNulls.toList();
 
   String matched(RgMatch m) =>
       m.submatches.map((r) => m.text.substring(r.start, r.end)).join(',');

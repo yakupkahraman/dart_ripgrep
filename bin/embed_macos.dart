@@ -1,6 +1,7 @@
 // Run from an Xcode "Run Script" build phase of the app target. It copies a
 // verified rg into Contents/Helpers and signs it with the app's identity, so
 // the app's own signature seals it and notarization passes.
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:dart_ripgrep/src/release.dart';
@@ -33,8 +34,9 @@ Future<void> main() async {
   final licenses = Directory('$contents/Resources/ripgrep')
     ..createSync(recursive: true);
   for (final name in ['LICENSE-MIT', 'UNLICENSE', 'COPYING']) {
-    File('${cache.path}/${need('ARCHS').split(' ').first}/$name')
-        .copySync('${licenses.path}/$name');
+    File(
+      '${cache.path}/${need('ARCHS').split(' ').first}/$name',
+    ).copySync('${licenses.path}/$name');
   }
 
   if (env['CODE_SIGNING_ALLOWED'] == 'NO') return;
@@ -46,17 +48,36 @@ Future<void> main() async {
     if (env['ENABLE_HARDENED_RUNTIME'] == 'YES') ...['--options', 'runtime'],
     if (env['CONFIGURATION'] == 'Release' && identity != '-') '--timestamp',
   ];
-  // A helper of a sandboxed app must inherit the sandbox or it is killed.
-  final entitlements = env['CODE_SIGN_ENTITLEMENTS'];
-  if (entitlements != null &&
-      File('${env['SRCROOT']}/$entitlements')
-          .readAsStringSync()
-          .contains('com.apple.security.app-sandbox')) {
+  // A helper of a sandboxed app must inherit the sandbox or it is killed, and
+  // a helper of an unsandboxed app must not, or it is killed too.
+  if (await _isSandboxed(env['CODE_SIGN_ENTITLEMENTS'], need('SRCROOT'))) {
     final plist = File('${cache.path}/inherit.entitlements')
       ..writeAsStringSync(_inheritPlist);
     args.addAll(['--entitlements', plist.path]);
   }
   await _run('codesign', [...args, rg]);
+}
+
+// Reads the value, not just the key: apps may set app-sandbox to false.
+Future<bool> _isSandboxed(String? entitlements, String srcRoot) async {
+  if (entitlements == null || entitlements.isEmpty) return false;
+  final path = entitlements.startsWith('/')
+      ? entitlements
+      : '$srcRoot/$entitlements';
+  // Converted to JSON because `plutil -extract` treats the dots in the key
+  // as a key path.
+  final result = await Process.run('plutil', [
+    '-convert',
+    'json',
+    '-o',
+    '-',
+    path,
+  ]);
+  if (result.exitCode != 0) {
+    throw ProcessException('plutil', [path], '${result.stderr}');
+  }
+  final plist = jsonDecode('${result.stdout}') as Map<String, dynamic>;
+  return plist['com.apple.security.app-sandbox'] == true;
 }
 
 Future<void> _run(String cmd, List<String> args) async {

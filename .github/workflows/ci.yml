@@ -42,6 +42,10 @@ jobs:
         include:
           - os: macos-latest
             app: build/macos/Build/Products/Release/example.app/Contents/MacOS/example
+          # Like apps that keep app-sandbox but set it to false.
+          - os: macos-latest
+            app: build/macos/Build/Products/Release/example.app/Contents/MacOS/example
+            unsandboxed: true
           - os: ubuntu-latest
             app: build/linux/x64/release/bundle/example
           - os: ubuntu-24.04-arm
@@ -68,6 +72,8 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y clang cmake ninja-build pkg-config libgtk-3-dev xvfb
+      - if: matrix.unsandboxed
+        run: /usr/libexec/PlistBuddy -c 'Set :com.apple.security.app-sandbox false' macos/Runner/Release.entitlements
       - run: flutter build ${{ runner.os == 'macOS' && 'macos' || runner.os == 'Linux' && 'linux' || 'windows' }} --release
       - name: Show where rg landed
         run: find build -name 'rg' -o -name 'rg.exe' | xargs ls -l
