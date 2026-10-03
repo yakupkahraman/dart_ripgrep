@@ -1,9 +1,16 @@
 name: CI
 
 on:
+  # Other branches are tested through their pull request, not twice.
   push:
+    branches: [main]
   pull_request:
   workflow_dispatch: # started by update-ripgrep.yml
+
+# A newer push to the same branch or PR cancels the run it supersedes.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   analyze:
@@ -65,6 +72,7 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: stable
+          cache: true
       - if: matrix.os == 'ubuntu-24.04-arm'
         run: |
           git clone --depth 1 -b stable https://github.com/flutter/flutter.git "$RUNNER_TEMP/flutter"
