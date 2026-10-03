@@ -8,7 +8,8 @@ apps and exposes file listing and content search as typed Dart streams.
 - Never use an `rg` from the user's system or PATH. The binary always ships
   with the app.
 - ripgrep's version and per-target SHA-256 hashes live only in
-  `lib/src/release.dart`.
+  `lib/src/release.dart`. Don't bump them by hand: the daily
+  `update-ripgrep.yml` workflow runs `tool/update_ripgrep.dart` and opens a PR.
 - Only the target platform's binary goes into a build.
 - The package stays pure Dart (no Flutter plugin).
 - Write the fewest lines that solve the problem, with no speculative options.

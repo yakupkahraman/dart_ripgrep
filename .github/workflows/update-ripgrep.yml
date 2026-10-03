@@ -1,0 +1,51 @@
+name: Update ripgrep
+
+# Opens a pull request when ripgrep publishes a new release. Merging it and
+# pushing the tag publishes the new package version (see publish.yml).
+on:
+  schedule:
+    - cron: '23 5 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write # to start CI on the pull request
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: dart-lang/setup-dart@v1
+      - run: dart pub get --no-example
+      - id: update
+        run: dart run tool/update_ripgrep.dart
+      - if: steps.update.outputs.ripgrep
+        run: dart format lib/src/release.dart
+      - if: steps.update.outputs.ripgrep
+        id: pr
+        uses: peter-evans/create-pull-request@v7
+        with:
+          branch: auto/update-ripgrep
+          delete-branch: true
+          commit-message: 'feat: update ripgrep to ${{ steps.update.outputs.ripgrep }}'
+          title: 'feat: update ripgrep to ${{ steps.update.outputs.ripgrep }}'
+          body: |
+            Automated update by `tool/update_ripgrep.dart`.
+
+            - ripgrep: `${{ steps.update.outputs.ripgrep }}` ([release notes](https://github.com/BurntSushi/ripgrep/releases/tag/${{ steps.update.outputs.ripgrep }}))
+            - Package version: `${{ steps.update.outputs.package }}`
+
+            Every archive matched the release's official `.sha256` file.
+
+            After merging, publish with:
+            ```sh
+            git tag v${{ steps.update.outputs.package }} && git push origin v${{ steps.update.outputs.package }}
+            ```
+      # Pull requests opened with GITHUB_TOKEN don't trigger workflows, but a
+      # workflow_dispatch does, and its checks show up on the PR's commit.
+      - if: steps.pr.outputs.pull-request-number
+        run: gh workflow run ci.yml --ref auto/update-ripgrep
+        env:
+          GH_TOKEN: ${{ github.token }}

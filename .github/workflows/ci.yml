@@ -3,6 +3,7 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch: # started by update-ripgrep.yml
 
 jobs:
   analyze:
@@ -12,8 +13,8 @@ jobs:
       - uses: dart-lang/setup-dart@v1
       # example/ needs the Flutter SDK, which this job doesn't install.
       - run: dart pub get --no-example
-      - run: dart format --output=none --set-exit-if-changed lib bin hook test
-      - run: dart analyze lib bin hook test
+      - run: dart format --output=none --set-exit-if-changed lib bin hook test tool
+      - run: dart analyze lib bin hook test tool
       # Same setup as publish.yml, so a broken publish shows up before tagging.
       - run: dart pub publish --dry-run
 
