@@ -9,7 +9,7 @@ jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
       # example/ needs the Flutter SDK, which this job doesn't install.
       - run: dart pub get --no-example
@@ -27,7 +27,7 @@ jobs:
         sdk: [3.10.0, stable]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: dart-lang/setup-dart@v1
         with:
           sdk: ${{ matrix.sdk }}
@@ -59,7 +59,7 @@ jobs:
         working-directory: example
         shell: bash
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       # Flutter publishes no prebuilt SDK for Linux arm64, so clone it there.
       - if: matrix.os != 'ubuntu-24.04-arm'
         uses: subosito/flutter-action@v2
