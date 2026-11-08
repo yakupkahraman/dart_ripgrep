@@ -95,12 +95,18 @@ bool _isNewer(String a, String b) {
   return false;
 }
 
-Future<List<int>> _get(String url) async {
+// GitHub occasionally answers with a transient 5xx, so those are retried.
+Future<List<int>> _get(String url, {int attempt = 1}) async {
   final client = HttpClient();
   try {
     final request = await client.getUrl(Uri.parse(url));
     request.headers.set('User-Agent', 'dart_ripgrep-updater');
     final response = await request.close();
+    if (response.statusCode >= 500 && attempt < 4) {
+      await response.drain<void>();
+      await Future<void>.delayed(Duration(seconds: 10 * attempt));
+      return await _get(url, attempt: attempt + 1);
+    }
     if (response.statusCode != 200) {
       throw HttpException('HTTP ${response.statusCode}', uri: Uri.parse(url));
     }
