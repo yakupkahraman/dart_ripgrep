@@ -31,8 +31,12 @@ Future<void> main() async {
         'https://github.com/BurntSushi/ripgrep/releases/download/'
         '$latest/$name';
     final actual = sha256.convert(await _get(base)).toString();
-    // The .sha256 file is "<hash>  <file name>".
-    final official = utf8.decode(await _get('$base.sha256')).split(' ').first;
+    // The format differs by platform: "<hash>  <name>" from sha256sum, or
+    // certutil's "SHA256 hash of <name>:" with the hash on the next line.
+    final official = RegExp(r'\b[0-9a-fA-F]{64}\b')
+        .firstMatch(utf8.decode(await _get('$base.sha256')))
+        ?.group(0)
+        ?.toLowerCase();
     if (actual != official) {
       throw StateError('$name: SHA-256 $actual does not match $official');
     }
