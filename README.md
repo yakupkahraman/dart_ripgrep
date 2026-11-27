@@ -5,7 +5,7 @@ bundled [ripgrep](https://github.com/BurntSushi/ripgrep).
 
 - **Bundled:** ripgrep ships inside your app. It never uses an `rg` from the
   user's system.
-- **Pinned and verified:** ripgrep 15.2.0, checked against a SHA-256 hash at
+- **Pinned and verified:** ripgrep 16.0.0, checked against a SHA-256 hash at
   build time.
 - **Lean:** only the binary for the target platform goes into your build.
 
