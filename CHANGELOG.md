@@ -1,3 +1,7 @@
+## 0.1.3
+
+- Update ripgrep to 16.0.0.
+
 ## 0.1.2
 
 - macOS: fix `rg` being killed in apps that set `app-sandbox` to `false`.
